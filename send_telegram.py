@@ -11,6 +11,7 @@ def send_telegram(logger, message):
          return
 
    send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + bot_chatID + '&parse_mode=Markdown&text=' + message
-   logger.info('sending '+message)
+   logger.info('TELEGRAM sending '+message)
+   
    response = requests.get(send_text).json()
-   logger.debug(response)
+   logger.debug('TELEGRAM '+str(response))
