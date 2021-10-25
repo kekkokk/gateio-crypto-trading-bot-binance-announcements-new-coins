@@ -1,7 +1,8 @@
 import requests
 import os
+from logger import logger
 
-def send_telegram(logger, message):
+def send_telegram(message):
 
    bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
    bot_chatID = os.getenv('TELEGRAM_BOT_CHAT_ID')

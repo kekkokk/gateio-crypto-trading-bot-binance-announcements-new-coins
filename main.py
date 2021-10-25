@@ -66,7 +66,7 @@ def main():
     t2 = threading.Thread(target=get_all_currencies)
     t2.start()
     
-    send_telegram(logger, "new-coin-bot is online")
+    send_telegram("new-coin-bot is online")
 
     while True:
         # check if the order file exists and load the current orders
@@ -123,14 +123,14 @@ def main():
                         if not test_mode:
                             logger.info("starting sell place_order with : ",symbol,
                                       pairing, volume*99.5/100, 'sell', last_price)
-                            send_telegram(logger, "starting sell place_order with : ",symbol,
+                            send_telegram("starting sell place_order with : ",symbol,
                                       pairing, volume*99.5/100, 'sell', last_price)
                             sell = place_order(symbol, pairing, volume*99.5/100, 'sell', last_price)
                             logger.info("Finish sell place_order")
-                            send_telegram(logger, "Finish sell place_order")
+                            send_telegram("Finish sell place_order")
 
                         logger.info(f"sold {coin} with {(float(last_price) - stored_price) / float(stored_price)*100}% PNL")
-                        send_telegram(logger, f"sold {coin} with {(float(last_price) - stored_price) / float(stored_price)*100}% PNL")
+                        send_telegram(f"sold {coin} with {(float(last_price) - stored_price) / float(stored_price)*100}% PNL")
 
                         # remove order from json file
                         order.pop(coin)
@@ -184,7 +184,7 @@ def main():
 
         if announcement_coin and announcement_coin not in order and announcement_coin not in sold_coins and announcement_coin not in old_coins:
             logger.info(f'New annoucement detected: {announcement_coin}')
-            send_telegram(logger, f'New annoucement detected: {announcement_coin}')
+            send_telegram(f'New annoucement detected: {announcement_coin}')
 
             if supported_currencies is not False:
                 if announcement_coin in supported_currencies:
@@ -218,30 +218,30 @@ def main():
                             logger.info('PLACING TEST ORDER')
                             logger.debug(order[announcement_coin])
 
-                            send_telegram(logger, 'PLACING TEST ORDER')
-                            send_telegram(logger, order[announcement_coin])
+                            send_telegram('PLACING TEST ORDER')
+                            send_telegram(order[announcement_coin])
                         # place a live order if False
                         else:
                             logger.info("starting buy place_order with : ",announcement_coin, pairing, qty,'buy', price)
-                            send_telegram(logger, "starting buy place_order with : ",announcement_coin, pairing, qty,'buy', price)
+                            send_telegram("starting buy place_order with : ",announcement_coin, pairing, qty,'buy', price)
                             order[announcement_coin] = place_order(announcement_coin, pairing, qty,'buy', price)
                             order[announcement_coin] = order[announcement_coin].__dict__
                             order[announcement_coin].pop("local_vars_configuration")
                             order[announcement_coin]['tp'] = tp
                             order[announcement_coin]['sl'] = sl
                             logger.info("Finished buy place_order")
-                            send_telegram(logger, "Finished buy place_order")
+                            send_telegram("Finished buy place_order")
 
                     except Exception as e:
                         logger.error(e)
 
                     else:
                         logger.info(f"Order created with {qty} on {announcement_coin}")
-                        send_telegram(logger, f"Order created with {qty} on {announcement_coin}")
+                        send_telegram(f"Order created with {qty} on {announcement_coin}")
                         store_order('order.json', order)
                 else:
                     logger.warning(f"Coin " + announcement_coin + " is not supported on gate io")
-                    send_telegram(logger, f"Coin " + announcement_coin + " is not supported on gate io")
+                    send_telegram(f"Coin " + announcement_coin + " is not supported on gate io")
                     os.remove("new_listing.json")
                     logger.debug('Removed new_listing.json due to coin not being '
                                   'listed on gate io')
