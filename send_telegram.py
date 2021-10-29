@@ -24,7 +24,7 @@ def send_telegram(message):
          if var is None:
             return
 
-      send_text = 'https://api.telegram.org/botX' + bot_token + '/sendMessage?chat_id=' + bot_chatID + '&parse_mode=Markdown&text=' + message
+      send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + bot_chatID + '&parse_mode=Markdown&text=' + message
       logger.info('TELEGRAM sending '+message)
       
       response = requests.get(send_text)
