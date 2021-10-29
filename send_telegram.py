@@ -4,10 +4,15 @@ from logger import logger
 from load_config import *
 
 config = load_config('config.yml')
-bot_token = config['TELEGRAM']['BOT_TOKEN']
-bot_chatID = str(config['TELEGRAM']['BOT_CHAT_ID'])
 
-send_success = True
+send_success = False
+
+if "BOT_TOKEN" in config['TELEGRAM'] and "BOT_CHAT_ID" in config['TELEGRAM']:
+   bot_token = config['TELEGRAM']['BOT_TOKEN']
+   bot_chatID = str(config['TELEGRAM']['BOT_CHAT_ID'])
+   send_success = True
+else:
+   logger.info('Telegram not configured -> disabled')
 
 def send_telegram(message):
 
