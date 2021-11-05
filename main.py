@@ -77,11 +77,11 @@ def main():
                 coin_tp = order[coin]['tp']
                 coin_sl = order[coin]['sl']
                 if not test_mode:
-                    volume = order[coin]['_amount']
+                    volume = float(order[coin]['_amount'])
                     stored_price = float(order[coin]['_price'])
                     symbol = order[coin]['_fee_currency']
                 else:
-                    volume = order[coin]['volume']
+                    volume = float(order[coin]['volume'])
                     stored_price = float(order[coin]['price'])
                     symbol = order[coin]['symbol']
 
@@ -121,10 +121,8 @@ def main():
                     try:
                         # sell for real if test mode is set to false
                         if not test_mode:
-                            logger.info("starting sell place_order with : ",symbol,
-                                      pairing, volume*99.5/100, 'sell', last_price)
-                            send_telegram("starting sell place_order with : ",symbol,
-                                      pairing, volume*99.5/100, 'sell', last_price)
+                            logger.info(f"starting sell place_order with {symbol} {pairing} {volume*99.5/100} sell {last_price}")
+                            send_telegram(f"starting sell place_order with {symbol} {pairing} {volume*99.5/100} sell {last_price}")
                             sell = place_order(symbol, pairing, volume*99.5/100, 'sell', last_price)
                             logger.info("Finish sell place_order")
                             send_telegram("Finish sell place_order")
