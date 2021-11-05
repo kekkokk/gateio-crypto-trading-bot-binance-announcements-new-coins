@@ -236,9 +236,42 @@ def main():
                         logger.error(e)
 
                     else:
-                        logger.info(f"Order created with {qty} on {announcement_coin}")
-                        send_telegram(f"Order created with {qty} on {announcement_coin}")
-                        store_order('order.json', order)
+                        if test_mode:
+                            order_status = order[announcement_coin]['status']
+                        else:
+                            order_status = order[announcement_coin]['_status']
+
+                        message = f'Order created on {announcement_coin} at a price of {price} each.  {order_status=}'
+                        logger.info(message)
+                        send_telegram(message)
+                        
+
+                        if order_status == 'filled' or order_status == "closed":
+                            if test_mode and float(order[announcement_coin]['_left']) > 0 and float(order[announcement_coin]['_amount']) > float(order[announcement_coin]['_left']):
+                                # you can only sell what you have. Minus fees.  Look for unfulfilled
+                                newAmount = float(order[announcement_coin]['_amount']) - float(order[announcement_coin]['_left']) - float(order[announcement_coin]['_fee'])
+                                order[announcement_coin]['volume'] = newAmount
+                            else:
+                                store_order('order_fulfilled.json', order)
+
+                                # you can only sell what you have. Minus fees.  Look for unfulfilled
+                                newAmount = float(order[announcement_coin]['_amount']) - float(order[announcement_coin]['_left']) - float(order[announcement_coin]['_fee'])
+                                order[announcement_coin]['_amount'] = newAmount
+
+                            store_order('order.json', order)
+                            
+                            if not test_mode and enable_sms:
+                                try:
+                                    send_sms_message(message)
+                                except Exception:
+                                    pass
+                        elif order_status == 'open' or order_status == 'cancelled':
+                            if not test_mode and order_status == 'open':
+                                # cancel orders and try again in the next iteration
+                                cancel_open_order(order[announcement_coin]['_id'], announcement_coin, pairing)
+                                logger.info(f"Cancelled order {order[announcement_coin]['_id']} .  Waiting for status of 'filled/closed' for {announcement_coin}")
+                            
+                            order.clear()  # reset for next iteration
                 else:
                     if announcement_coin:
                         logger.warning(f'{announcement_coin=} is not supported on gate io')
