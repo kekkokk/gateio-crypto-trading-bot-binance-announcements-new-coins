@@ -121,14 +121,16 @@ def main():
                     try:
                         # sell for real if test mode is set to false
                         if not test_mode:
-                            logger.info(f"starting sell place_order with {symbol} {pairing} {volume*99.5/100} sell {last_price}")
-                            send_telegram(f"starting sell place_order with {symbol} {pairing} {volume*99.5/100} sell {last_price}")
-                            sell = place_order(symbol, pairing, volume*99.5/100, 'sell', last_price)
+                            message = f'starting sell place_order with {symbol} {pairing} volume {float(volume)} for price: ${float(last_price)} -> {float(volume)*float(last_price)} sell {last_price}'
+                            logger.info(message)
+                            send_telegram(message)
+                            sell = place_order(symbol, pairing, float(volume)*float(last_price), 'sell', last_price)
                             logger.info("Finish sell place_order")
                             send_telegram("Finish sell place_order")
 
-                        logger.info(f"sold {coin} with {(float(last_price) - stored_price) / float(stored_price)*100}% PNL")
-                        send_telegram(f"sold {coin} with {(float(last_price) - stored_price) / float(stored_price)*100}% PNL")
+                        message = f'sold {coin} with {(float(last_price) - stored_price) / float(stored_price)*100}% PNL'
+                        logger.info(message)
+                        send_telegram(message)
 
                         # remove order from json file
                         order.pop(coin)
@@ -137,6 +139,7 @@ def main():
 
                     except Exception as e:
                         logger.error(e)
+                        traceback.print_exc()
 
                     # store sold trades data
                     else:
@@ -217,11 +220,12 @@ def main():
                             logger.debug(order[announcement_coin])
 
                             send_telegram('PLACING TEST ORDER')
-                            send_telegram(order[announcement_coin])
+                            send_telegram(f'{order[announcement_coin]}')
                         # place a live order if False
                         else:
-                            logger.info("starting buy place_order with : ",announcement_coin, pairing, qty,'buy', price)
-                            send_telegram("starting buy place_order with : ",announcement_coin, pairing, qty,'buy', price)
+                            message = f'Starting buy place_order with: {announcement_coin} {pairing} {qty} buy {price}'
+                            logger.info(message)
+                            send_telegram(message)
                             order[announcement_coin] = place_order(announcement_coin, pairing, qty,'buy', price)
                             order[announcement_coin] = order[announcement_coin].__dict__
                             order[announcement_coin].pop("local_vars_configuration")
@@ -232,7 +236,7 @@ def main():
 
                     except Exception as e:
                         logger.error(e)
-
+                        traceback.print_exc()
                     else:
                         if test_mode:
                             order_status = order[announcement_coin]['status']
@@ -242,7 +246,6 @@ def main():
                         message = f'Order created on {announcement_coin} at a price of {price} each.  {order_status=}'
                         logger.info(message)
                         send_telegram(message)
-                        
 
                         if order_status == 'filled' or order_status == "closed":
                             if test_mode and float(order[announcement_coin]['_left']) > 0 and float(order[announcement_coin]['_amount']) > float(order[announcement_coin]['_left']):
@@ -257,7 +260,7 @@ def main():
                                 order[announcement_coin]['_amount'] = newAmount
 
                             store_order('order.json', order)
-                            
+
                             if not test_mode and enable_sms:
                                 try:
                                     send_sms_message(message)
@@ -268,12 +271,12 @@ def main():
                                 # cancel orders and try again in the next iteration
                                 cancel_open_order(order[announcement_coin]['_id'], announcement_coin, pairing)
                                 logger.info(f"Cancelled order {order[announcement_coin]['_id']} .  Waiting for status of 'filled/closed' for {announcement_coin}")
-                            
+
                             order.clear()  # reset for next iteration
                 else:
                     if announcement_coin:
-                        logger.warning(f'{announcement_coin=} is not supported on gate io')
-                        send_telegram(f"Coin " + announcement_coin + " is not supported on gate io")
+                        logger.warning(f'{announcement_coin} is not supported on gate io')
+                        send_telegram(f'{announcement_coin} is not supported on gate io')
                         if os.path.isfile('new_listing.json'):
                             os.remove("new_listing.json")
                             logger.debug('Removed new_listing.json due to coin not being '
