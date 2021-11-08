@@ -121,16 +121,14 @@ def main():
                     try:
                         # sell for real if test mode is set to false
                         if not test_mode:
-                            message = f'starting sell place_order with {symbol} {pairing} volume {float(volume)} for price: ${float(last_price)} -> {float(volume)*float(last_price)} sell {last_price}'
-                            logger.info(message)
-                            send_telegram(message)
+                            logger.info(f'starting sell place_order with {symbol} {pairing} volume {float(volume)} for price: ${float(last_price)} -> {float(volume)*float(last_price)} sell {last_price}')
+                            send_telegram(f'starting sell place_order with {symbol} {pairing} volume {float(volume)} for price: ${float(last_price)} -> {float(volume)*float(last_price)} sell {last_price}')
                             sell = place_order(symbol, pairing, float(volume)*float(last_price), 'sell', last_price)
                             logger.info("Finish sell place_order")
                             send_telegram("Finish sell place_order")
 
-                        message = f'sold {coin} with {(float(last_price) - stored_price) / float(stored_price)*100}% PNL'
-                        logger.info(message)
-                        send_telegram(message)
+                        logger.info(f'sold {coin} with {(float(last_price) - stored_price) / float(stored_price)*100}% PNL')
+                        send_telegram(f'sold {coin} with {(float(last_price) - stored_price) / float(stored_price)*100}% PNL')
 
                         # remove order from json file
                         order.pop(coin)
@@ -170,7 +168,7 @@ def main():
                                 'side': 'sell',
                                 'iceberg': '0',
                                 'price': last_price}
-                            logger.info('Sold coins:\r\n' + sold_coins[coin])
+                            logger.info('Sold coins:\r\n' + str(sold_coins[coin]))
 
                             store_order('sold.json', sold_coins)
 
@@ -185,8 +183,8 @@ def main():
 
         if announcement_coin not in order and announcement_coin not in sold_coins and announcement_coin not in old_coins:
             if announcement_coin:
-                logger.info(f'New annoucement detected: {announcement_coin}')
-                send_telegram(f'New annoucement detected: {announcement_coin}')
+                logger.info(f'New announcement detected: {announcement_coin}')
+                send_telegram(f'New announcement detected: {announcement_coin}')
             if supported_currencies:
                 if announcement_coin and announcement_coin in supported_currencies:
                     logger.debug("Starting get_last_price")
@@ -218,65 +216,29 @@ def main():
                             }
                             logger.info('PLACING TEST ORDER')
                             logger.debug(order[announcement_coin])
-
-                            send_telegram('PLACING TEST ORDER')
-                            send_telegram(f'{order[announcement_coin]}')
                         # place a live order if False
                         else:
-                            message = f'Starting buy place_order with: {announcement_coin} {pairing} {qty} buy {price}'
-                            logger.info(message)
-                            send_telegram(message)
+                            logger.info(f'starting buy place_order with : {announcement_coin=} | {pairing=} | {qty=} | side = buy | {price=}')
+                            send_telegram(f'starting buy place_order with : {announcement_coin=} | {pairing=} | {qty=} | side = buy | {price=}')
                             order[announcement_coin] = place_order(announcement_coin, pairing, qty,'buy', price)
                             order[announcement_coin] = order[announcement_coin].__dict__
                             order[announcement_coin].pop("local_vars_configuration")
                             order[announcement_coin]['tp'] = tp
                             order[announcement_coin]['sl'] = sl
-                            logger.info("Finished buy place_order")
-                            send_telegram("Finished buy place_order")
-
+                            logger.info('Finished buy place_order')
+                            send_telegram('Finished buy place_order')
                     except Exception as e:
                         logger.error(e)
                         traceback.print_exc()
+
                     else:
-                        if test_mode:
-                            order_status = order[announcement_coin]['status']
-                        else:
-                            order_status = order[announcement_coin]['_status']
-
-                        message = f'Order created on {announcement_coin} at a price of {price} each.  {order_status=}'
-                        logger.info(message)
-                        send_telegram(message)
-
-                        if order_status == 'filled' or order_status == "closed":
-                            if test_mode and float(order[announcement_coin]['_left']) > 0 and float(order[announcement_coin]['_amount']) > float(order[announcement_coin]['_left']):
-                                # you can only sell what you have. Minus fees.  Look for unfulfilled
-                                newAmount = float(order[announcement_coin]['_amount']) - float(order[announcement_coin]['_left']) - float(order[announcement_coin]['_fee'])
-                                order[announcement_coin]['volume'] = newAmount
-                            else:
-                                store_order('order_fulfilled.json', order)
-
-                                # you can only sell what you have. Minus fees.  Look for unfulfilled
-                                newAmount = float(order[announcement_coin]['_amount']) - float(order[announcement_coin]['_left']) - float(order[announcement_coin]['_fee'])
-                                order[announcement_coin]['_amount'] = newAmount
-
-                            store_order('order.json', order)
-
-                            if not test_mode and enable_sms:
-                                try:
-                                    send_sms_message(message)
-                                except Exception:
-                                    pass
-                        elif order_status == 'open' or order_status == 'cancelled':
-                            if not test_mode and order_status == 'open':
-                                # cancel orders and try again in the next iteration
-                                cancel_open_order(order[announcement_coin]['_id'], announcement_coin, pairing)
-                                logger.info(f"Cancelled order {order[announcement_coin]['_id']} .  Waiting for status of 'filled/closed' for {announcement_coin}")
-
-                            order.clear()  # reset for next iteration
+                        logger.info(f'Order created with {qty} on {announcement_coin}')
+                        send_telegram(f'Order created with {qty} on {announcement_coin}')
+                        store_order('order.json', order)
                 else:
                     if announcement_coin:
-                        logger.warning(f'{announcement_coin} is not supported on gate io')
-                        send_telegram(f'{announcement_coin} is not supported on gate io')
+                        logger.warning(f'{announcement_coin=} is not supported on gate io')
+                        send_telegram(f'{announcement_coin=} is not supported on gate io')
                         if os.path.isfile('new_listing.json'):
                             os.remove("new_listing.json")
                             logger.debug('Removed new_listing.json due to coin not being '
