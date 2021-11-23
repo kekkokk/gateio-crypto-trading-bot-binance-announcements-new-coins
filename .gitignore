@@ -4,13 +4,16 @@ auth/auth.yml
 # Ignore orders
 order.json
 sold.json
-new_listing.json
+*new_listing.json*
+session.json
 
 # Ignore bot log
 bot.log
+/logs
 
-# Ignore currency list
+# Ignore currency list and old coins
 currencies.json
+old_coins.json
 
 # Ignore pycache
 __pycache__/
@@ -21,3 +24,17 @@ config.yml
 
 # Ignore test file
 test_order.py
+
+
+.idea/
+
+# Visual Studio Code as suggested by https://github.com/github/gitignore/blob/master/Global/VisualStudioCode.gitignore
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Local History for Visual Studio Code
+.history/
