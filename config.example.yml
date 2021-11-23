@@ -21,3 +21,11 @@
     LOG_LEVEL: INFO
     LOG_FILE: bot.log
     LOG_TO_CONSOLE: True
+  TELEGRAM:
+    # set to True to enable telegram notifications
+    ENABLED: False
+    # Getting a bot token: https://core.telegram.org/bots#6-botfather
+    BOT_TOKEN: my_token
+    # Getting your chatID: find your bot and send a message,
+    # then go visit https://api.telegram.org/bot<YOUR_TOKEN>/getUpdates and find the chat ID
+    BOT_CHAT_ID: my_chat_id
